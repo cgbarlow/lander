@@ -31,6 +31,12 @@ export function createShip() {
 export function stepShip(ship, input) {
   if (ship.crashed) return;
 
+  // While sitting on the pad with no thrust pressed, the ship just rests:
+  // no gravity, no drift. Pressing thrust (or hover) commits to take-off.
+  if (ship.landed && !input.thrust && !input.hover) {
+    return;
+  }
+
   // --- Tilt damping (Lander.arm: deep_dive flying_by_mouse) -------------
   // target tilt magnitudes from the input's virtual cursor (-1..+1)
   const targetPitch = input.pitch * MAX_TILT;
