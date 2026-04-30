@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Mobile / touch controls**: virtual thumbstick (bottom-left) plus
+  THRUST / HOVER / FIRE on-screen buttons (bottom-right), shown
+  automatically on coarse-pointer devices. Multi-touch supported so the
+  stick and a button can be held simultaneously.
+
+### Fixed
+
+- **Backface cull was wrong** for any face offset from the camera origin
+  (`n.z > 0` only works for faces at the origin). With the camera
+  looking down-and-back at the resting ship, its upper faces have
+  normals tilted slightly forward (+z) and were being culled — the ship
+  was invisible until you took off and rotated. Replaced with the proper
+  test: `dot(camera-space-vertex, normal) > 0` ⇒ backfacing.
+
 ## [0.1.0] — 2026-04-30
 
 ### Added

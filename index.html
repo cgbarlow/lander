@@ -12,16 +12,32 @@
       <div id="overlay" class="overlay">
         <h1>LANDER</h1>
         <p class="byline">After David Braben (Acorn Archimedes, 1987)</p>
-        <p class="hint">Click to play. Esc to release the cursor.</p>
-        <ul class="controls">
+        <p class="hint"><span class="desktop-only">Click to play. Esc to release the cursor.</span><span class="touch-only">Tap to dismiss. Use the stick + buttons.</span></p>
+        <ul class="controls desktop-only">
           <li><b>Mouse</b> &mdash; tilt the ship</li>
           <li><b>Left button / Space</b> &mdash; thrust</li>
           <li><b>Middle button / H / Shift</b> &mdash; hover</li>
           <li><b>Right button / F</b> &mdash; fire (&minus;1 pt)</li>
         </ul>
+        <ul class="controls touch-only">
+          <li><b>Stick</b> &mdash; tilt the ship</li>
+          <li><b>THRUST</b> &mdash; engines on</li>
+          <li><b>HOVER</b> &mdash; auto-balance</li>
+          <li><b>FIRE</b> &mdash; shoot (&minus;1 pt)</li>
+        </ul>
         <p class="goal">Land level on the grey pad to refuel. Shoot trees, buildings and gazebos for score. Watch for falling rocks once you pass 800.</p>
       </div>
       <div id="message" class="message" hidden></div>
+      <div id="touch-controls" class="touch-controls" aria-hidden="true">
+        <div id="joystick" class="joystick">
+          <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+        <div class="touch-buttons">
+          <button id="btn-fire" class="tbtn tbtn-fire" type="button" aria-label="Fire">FIRE</button>
+          <button id="btn-hover" class="tbtn tbtn-hover" type="button" aria-label="Hover">HOVER</button>
+          <button id="btn-thrust" class="tbtn tbtn-thrust" type="button" aria-label="Thrust">THRUST</button>
+        </div>
+      </div>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

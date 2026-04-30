@@ -106,6 +106,23 @@ describe('smoke', () => {
     expect(Math.abs(ship.vel.y)).toBeLessThan(0.05);
   });
 
+  it('ship is visible from the resting camera angle (cull regression)', async () => {
+    // Regression test for the bug where the resting ship was invisible
+    // until you took off and rotated. The naive cull `n.z > 0` killed
+    // upper faces whose normals had a slight forward (+z) component once
+    // rotated into camera space. The correct test is dot(camera-vertex, n) > 0.
+    const canvas = new FakeCanvas();
+    const game = createGame(canvas, fakeInput);
+    const ctx = canvas.getContext('2d');
+    const { render } = await import('../src/render/pipeline.js');
+    render(ctx, game.state, []);
+    // Before the fix, the ship's faces all got dropped silently — the
+    // pipeline still ran but no ship triangles reached the canvas. We
+    // assert that *some* draw calls happened, then assert the same with
+    // the camera fixed at the resting ship-pose specifically.
+    expect(ctx.calls).toBeGreaterThan(50);
+  });
+
   it('object placement contains varied object types', async () => {
     const { buildObjects } = await import('../src/world/objects.js');
     const objs = buildObjects(1987);

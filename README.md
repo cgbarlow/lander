@@ -27,15 +27,19 @@ npm run preview  # serves ./dist on http://localhost:4173
 
 ### Controls
 
-| Action  | Mouse                | Keyboard            |
-|---------|----------------------|---------------------|
-| Tilt    | move (analogue)      | W A S D / arrow keys |
-| Thrust  | left button          | Space               |
-| Hover   | middle button        | H or Shift          |
-| Fire    | right button (−1 pt) | F                   |
-| Release | Esc                  | Esc                 |
+| Action  | Mouse                | Keyboard             | Touch                  |
+|---------|----------------------|----------------------|------------------------|
+| Tilt    | move (analogue)      | W A S D / arrow keys | virtual stick (left)   |
+| Thrust  | left button          | Space                | **THRUST** button      |
+| Hover   | middle button        | H or Shift           | **HOVER** button       |
+| Fire    | right button (−1 pt) | F                    | **FIRE** button        |
+| Release | Esc                  | Esc                  | n/a                    |
 
-Click the canvas to engage Pointer Lock. Esc releases the cursor.
+On desktop, click the canvas to engage Pointer Lock; Esc releases the
+cursor. On phones and tablets the mouse path is replaced automatically
+with a thumbstick (bottom-left) and three buttons (bottom-right);
+multi-touch is supported so you can hold the stick with one thumb and
+press THRUST with the other.
 
 ### Scoring
 

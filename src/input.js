@@ -1,6 +1,13 @@
-// Pointer-lock mouse + keyboard fallback. See ADR-005 / SPEC-005-A.
+// Pointer-lock mouse + keyboard fallback + touch (mobile). See ADR-005
+// / SPEC-005-A. Touch uses a virtual thumbstick + on-screen buttons; the
+// stick's polar offset feeds the same `pitch`/`roll` virtual cursor that
+// the mouse drives, so the rest of the engine sees one input model.
 
 import { MOUSE_SENSITIVITY, KEYBOARD_TILT_RATE } from './constants.js';
+
+const isTouchDevice = typeof window !== 'undefined'
+  && (('ontouchstart' in window)
+      || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches));
 
 export function createInput(canvas) {
   const state = {
@@ -15,12 +22,20 @@ export function createInput(canvas) {
             Space: false, ShiftLeft: false, KeyH: false, KeyF: false },
   };
 
-  // --- Pointer lock ----------------------------------------------------
-  canvas.addEventListener('click', () => {
-    if (!document.pointerLockElement) {
-      canvas.requestPointerLock?.();
-    }
-  });
+  // --- Pointer lock (desktop) -----------------------------------------
+  // Skip the pointer-lock dance entirely on touch devices — there's no
+  // cursor to lock and requestPointerLock would just fail.
+  if (!isTouchDevice) {
+    canvas.addEventListener('click', () => {
+      if (!document.pointerLockElement) {
+        canvas.requestPointerLock?.();
+      }
+    });
+  } else {
+    // On touch, dismiss the overlay on first interaction.
+    const dismissOnce = () => { hideOverlay(); state.pointerLocked = true; };
+    canvas.addEventListener('touchstart', dismissOnce, { once: true, passive: true });
+  }
 
   document.addEventListener('pointerlockchange', () => {
     state.pointerLocked = document.pointerLockElement === canvas;
@@ -63,6 +78,120 @@ export function createInput(canvas) {
     else if (e.code in state.keys) state.keys[e.code] = false;
     else if (e.key in state.keys) state.keys[e.key] = false;
   });
+
+  // --- Touch controls --------------------------------------------------
+  // Virtual thumbstick (left) + three buttons (right). Each control owns
+  // its own touch identifier so the player can hold the stick with one
+  // thumb and press THRUST with the other simultaneously.
+
+  const stickEl   = document.getElementById('joystick');
+  const stickKnob = document.getElementById('joystick-knob');
+  const btnThrust = document.getElementById('btn-thrust');
+  const btnHover  = document.getElementById('btn-hover');
+  const btnFire   = document.getElementById('btn-fire');
+  const STICK_RADIUS_PX = 60;   // movement radius of the knob in pixels
+
+  let stickTouchId = null;
+  let stickCenterX = 0, stickCenterY = 0;
+
+  function updateStickFromTouch(t) {
+    let dx = (t.clientX - stickCenterX) / STICK_RADIUS_PX;
+    let dy = (t.clientY - stickCenterY) / STICK_RADIUS_PX;
+    const r = Math.hypot(dx, dy);
+    if (r > 1) { dx /= r; dy /= r; }
+    state.roll  = dx;
+    state.pitch = dy;
+    if (stickKnob) {
+      stickKnob.style.transform =
+        `translate(${dx * STICK_RADIUS_PX}px, ${dy * STICK_RADIUS_PX}px)`;
+    }
+  }
+
+  function releaseStick() {
+    stickTouchId = null;
+    state.roll = 0;
+    state.pitch = 0;
+    if (stickKnob) stickKnob.style.transform = '';
+  }
+
+  if (stickEl) {
+    stickEl.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      stickTouchId = t.identifier;
+      const rect = stickEl.getBoundingClientRect();
+      stickCenterX = rect.left + rect.width / 2;
+      stickCenterY = rect.top + rect.height / 2;
+      updateStickFromTouch(t);
+    }, { passive: false });
+  }
+
+  document.addEventListener('touchmove', (e) => {
+    if (stickTouchId === null) return;
+    for (const t of e.changedTouches) {
+      if (t.identifier === stickTouchId) {
+        e.preventDefault();
+        updateStickFromTouch(t);
+      }
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', (e) => {
+    for (const t of e.changedTouches) {
+      if (t.identifier === stickTouchId) {
+        releaseStick();
+      }
+    }
+  });
+  document.addEventListener('touchcancel', (e) => {
+    for (const t of e.changedTouches) {
+      if (t.identifier === stickTouchId) {
+        releaseStick();
+      }
+    }
+  });
+
+  function bindHoldButton(el, onPress, onRelease) {
+    if (!el) return;
+    let activeTouchId = null;
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      activeTouchId = t.identifier;
+      el.classList.add('active');
+      onPress();
+    }, { passive: false });
+    const release = (e) => {
+      for (const t of e.changedTouches) {
+        if (t.identifier === activeTouchId) {
+          activeTouchId = null;
+          el.classList.remove('active');
+          onRelease();
+        }
+      }
+    };
+    el.addEventListener('touchend', release);
+    el.addEventListener('touchcancel', release);
+  }
+
+  bindHoldButton(btnThrust,
+    () => { state.thrust = true; },
+    () => { state.thrust = false; });
+  bindHoldButton(btnHover,
+    () => { state.hover = true; },
+    () => { state.hover = false; });
+
+  // Fire is edge-triggered: latch on press, consumed by snapshot().
+  if (btnFire) {
+    btnFire.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      btnFire.classList.add('active');
+      state.fire = true;
+    }, { passive: false });
+    const fireRelease = () => btnFire.classList.remove('active');
+    btnFire.addEventListener('touchend', fireRelease);
+    btnFire.addEventListener('touchcancel', fireRelease);
+  }
 
   /** Per-step update: fold keyboard nudges into the virtual cursor and
    * derive thrust/hover from mouse OR keyboard. Returns a snapshot. */
