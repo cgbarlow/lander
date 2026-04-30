@@ -10,7 +10,12 @@ import {
 } from '../constants.js';
 import { rotX, mulVec } from '../math/mat3.js';
 
-const cameraRot = rotX(-CAMERA_PITCH);
+// To look DOWN by angle θ, we rotate the world UP by θ around the X axis
+// (so points below the camera swing forward into view). Hand-verified:
+// camera 6 above + 5 behind ship, atan2(6,5)≈0.88 puts ship at screen
+// centre; pitch 0.65 puts it in the lower third with horizon visible up
+// top — matching the original framing.
+const cameraRot = rotX(CAMERA_PITCH);
 
 export function cameraPosition(ship) {
   return {

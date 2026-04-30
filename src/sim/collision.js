@@ -41,7 +41,7 @@ export function checkGround(ship) {
   // Touching or below ground. Are we on the launchpad and stable?
   if (isLaunchpad(lowestX, lowestZ) && isSafeToLand(ship)) {
     // Snap to pad altitude.
-    ship.pos.y = LAUNCHPAD_ALTITUDE - UNDERCARRIAGE_Y;
+    ship.pos.y = LAUNCHPAD_ALTITUDE + UNDERCARRIAGE_Y;
     ship.vel.x = 0;
     ship.vel.y = 0;
     ship.vel.z = 0;
