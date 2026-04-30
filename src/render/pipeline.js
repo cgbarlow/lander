@@ -166,11 +166,15 @@ function projectTriangle(tri, cam, doBackfaceCull) {
   const cb = worldToCamera(tri.b, cam);
   const cc = worldToCamera(tri.c, cam);
 
-  // Backface cull in camera space (face away from camera = drop).
+  // Backface cull in camera space. The camera is at the origin, so the
+  // view ray to the face is just `ca`. A face is back-facing iff its
+  // outward normal has a positive component along that ray, i.e.
+  // dot(ca, n) > 0. (Using `n.z > 0` only works for faces at the camera
+  // origin and would wrongly cull off-axis faces — e.g. the top of the
+  // ship when viewed from above-and-behind.)
   if (doBackfaceCull) {
     const n = cross(sub(cb, ca), sub(cc, ca));
-    // Camera looks down -Z, so a face whose camera-space normal has +z is backfacing.
-    if (n.z > 0) return null;
+    if (dot(ca, n) > 0) return null;
   }
 
   const pa = projectCamera(ca);

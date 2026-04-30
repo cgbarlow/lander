@@ -84,3 +84,90 @@ html, body {
   pointer-events: none;
   letter-spacing: 0.1em;
 }
+
+/* --- Touch controls (mobile / coarse pointer) --------------------------- */
+
+.touch-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+}
+
+/* Show on coarse-pointer devices (phones, tablets) — desktop mice are
+   "fine"; touchscreens report "coarse". */
+@media (pointer: coarse), (hover: none) {
+  .touch-controls { display: block; }
+  /* On touch we don't need the giant overlay's "Click to play" — but we
+     still want the credits visible on first load until the user taps. */
+}
+
+.joystick {
+  position: absolute;
+  left: max(env(safe-area-inset-left), 16px);
+  bottom: max(env(safe-area-inset-bottom), 16px);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  pointer-events: auto;
+  touch-action: none;
+  display: grid;
+  place-items: center;
+}
+
+.joystick-knob {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  transition: transform 80ms linear;
+}
+
+.touch-buttons {
+  position: absolute;
+  right: max(env(safe-area-inset-right), 16px);
+  bottom: max(env(safe-area-inset-bottom), 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.tbtn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 0.9rem 1.2rem;
+  min-width: 96px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+}
+
+.tbtn.active {
+  background: rgba(255, 255, 255, 0.85);
+  color: #000;
+  transform: scale(0.96);
+}
+
+.tbtn-fire   { border-color: #ff7766; }
+.tbtn-hover  { border-color: #ffcc66; }
+.tbtn-thrust { border-color: #66dd88; }
+
+/* Show desktop-only / touch-only sections per device class. */
+.touch-only { display: none; }
+@media (pointer: coarse), (hover: none) {
+  .desktop-only { display: none; }
+  .touch-only { display: revert; }
+}
