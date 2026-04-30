@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lander</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="game" width="320" height="256" aria-label="Lander game canvas"></canvas>
+      <div id="overlay" class="overlay">
+        <h1>LANDER</h1>
+        <p class="byline">After David Braben (Acorn Archimedes, 1987)</p>
+        <p class="hint">Click to play. Esc to release the cursor.</p>
+        <ul class="controls">
+          <li><b>Mouse</b> &mdash; tilt the ship</li>
+          <li><b>Left button / Space</b> &mdash; thrust</li>
+          <li><b>Middle button / H / Shift</b> &mdash; hover</li>
+          <li><b>Right button / F</b> &mdash; fire (&minus;1 pt)</li>
+        </ul>
+        <p class="goal">Land level on the grey pad to refuel. Shoot trees, buildings and gazebos for score. Watch for falling rocks once you pass 800.</p>
+      </div>
+      <div id="message" class="message" hidden></div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
