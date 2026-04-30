@@ -89,7 +89,15 @@ export function createInput(canvas) {
   const btnThrust = document.getElementById('btn-thrust');
   const btnHover  = document.getElementById('btn-hover');
   const btnFire   = document.getElementById('btn-fire');
-  const STICK_RADIUS_PX = 60;   // movement radius of the knob in pixels
+  // Knob travel radius. Chosen to keep the knob inside the joystick base
+  // (joystick is 100px diameter ⇒ inner radius 50px; knob is 42px ⇒
+  // half-radius 21px; max travel ≈ 50 - 21 = 29px, with a touch of bleed).
+  // Larger devices (.media min-width 700px) get bumped up.
+  const STICK_RADIUS_PX = (typeof window !== 'undefined'
+    && window.matchMedia
+    && window.matchMedia('(min-width: 700px)').matches)
+    ? 56
+    : 36;
 
   let stickTouchId = null;
   let stickCenterX = 0, stickCenterY = 0;

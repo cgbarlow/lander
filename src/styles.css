@@ -8,20 +8,43 @@ html, body {
   font-family: 'Menlo', 'Consolas', monospace;
   overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  /* Lock scroll to defeat iOS rubber-band drag during touch play. */
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
+/* Use dynamic viewport units where supported so iOS Safari's collapsing
+   address bar / bottom toolbar don't push controls off-screen. Falls back
+   to `vh` on browsers that don't support `dvh` yet. */
 #app {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   display: grid;
   place-items: center;
   background: #000;
 }
 
-#game {
+/* The game wrapper has the canvas's exact aspect ratio, so anything we
+   absolutely position inside it (overlay, touch controls) is anchored to
+   the visible game area — independent of viewport letterboxing. */
+#game-wrap {
+  position: relative;
+  width: min(100vw, calc(100dvh * 320 / 256));
+  height: min(100dvh, calc(100vw * 256 / 320));
+  /* Pre-`dvh` browsers fall back to vh; identical math */
   width: min(100vw, calc(100vh * 320 / 256));
   height: min(100vh, calc(100vw * 256 / 320));
+  width: min(100vw, calc(100dvh * 320 / 256));
+  height: min(100dvh, calc(100vw * 256 / 320));
+}
+
+#game {
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   background: #000;
@@ -41,33 +64,35 @@ html, body {
   padding: 1.5rem;
   pointer-events: none;
   transition: opacity 200ms ease;
+  overflow-y: auto;
 }
 
 .overlay.hidden { opacity: 0; pointer-events: none; }
 
 .overlay h1 {
-  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-size: clamp(1.8rem, 7vw, 5rem);
   letter-spacing: 0.4em;
   margin: 0 0 0.5rem;
   color: #f0f0f0;
 }
 
-.byline { color: #888; margin: 0 0 2rem; }
-.hint { color: #ffcc66; margin: 0.5rem 0 1.5rem; }
+.byline { color: #888; margin: 0 0 1rem; font-size: clamp(0.7rem, 2.5vw, 1rem); }
+.hint { color: #ffcc66; margin: 0.5rem 0 1rem; font-size: clamp(0.8rem, 2.6vw, 1rem); }
 
 .controls {
   list-style: none;
   padding: 0;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   line-height: 1.7;
   color: #c8c8c8;
+  font-size: clamp(0.7rem, 2.4vw, 1rem);
 }
 .controls b { color: #fff; }
 
 .goal {
   max-width: 36rem;
   color: #a0a0a0;
-  font-size: 0.9rem;
+  font-size: clamp(0.7rem, 2.4vw, 0.9rem);
   line-height: 1.5;
 }
 
@@ -95,60 +120,62 @@ html, body {
   z-index: 10;
 }
 
-/* Show on coarse-pointer devices (phones, tablets) — desktop mice are
-   "fine"; touchscreens report "coarse". */
+/* Show on coarse-pointer devices (phones, tablets). */
 @media (pointer: coarse), (hover: none) {
   .touch-controls { display: block; }
-  /* On touch we don't need the giant overlay's "Click to play" — but we
-     still want the credits visible on first load until the user taps. */
 }
 
+/* Compact controls anchored to the viewport (#app) bottom, padded by
+   the device's safe-area inset so they clear the iOS home indicator
+   and Safari's bottom toolbar. */
 .joystick {
   position: absolute;
-  left: max(env(safe-area-inset-left), 16px);
-  bottom: max(env(safe-area-inset-bottom), 16px);
-  width: 140px;
-  height: 140px;
+  left: max(env(safe-area-inset-left, 0px), 12px);
+  bottom: max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px);
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.10);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   pointer-events: auto;
   touch-action: none;
   display: grid;
   place-items: center;
+  backdrop-filter: blur(2px);
 }
 
 .joystick-knob {
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
-  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.9);
   pointer-events: none;
   transition: transform 80ms linear;
 }
 
 .touch-buttons {
   position: absolute;
-  right: max(env(safe-area-inset-right), 16px);
-  bottom: max(env(safe-area-inset-bottom), 16px);
+  right: max(env(safe-area-inset-right, 0px), 12px);
+  bottom: max(calc(env(safe-area-inset-bottom, 0px) + 12px), 16px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   pointer-events: auto;
+  align-items: flex-end;
 }
 
 .tbtn {
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #fff;
   background: rgba(0, 0, 0, 0.55);
   border: 2px solid rgba(255, 255, 255, 0.5);
   border-radius: 999px;
-  padding: 0.9rem 1.2rem;
-  min-width: 96px;
+  padding: 0.55rem 1rem;
+  min-width: 78px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -164,6 +191,13 @@ html, body {
 .tbtn-fire   { border-color: #ff7766; }
 .tbtn-hover  { border-color: #ffcc66; }
 .tbtn-thrust { border-color: #66dd88; }
+
+/* Larger controls when there's room (landscape / tablet). */
+@media (min-width: 700px) and (pointer: coarse) {
+  .joystick { width: 140px; height: 140px; }
+  .joystick-knob { width: 56px; height: 56px; }
+  .tbtn { font-size: 0.95rem; padding: 0.9rem 1.2rem; min-width: 96px; }
+}
 
 /* Show desktop-only / touch-only sections per device class. */
 .touch-only { display: none; }

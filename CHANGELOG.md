@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   normals tilted slightly forward (+z) and were being culled — the ship
   was invisible until you took off and rotated. Replaced with the proper
   test: `dot(camera-space-vertex, normal) > 0` ⇒ backfacing.
+- **iOS Safari clipped the touch controls** behind the bottom toolbar.
+  Switched the layout to `100dvh` (dynamic viewport height) so the
+  visible area excludes the dynamic browser chrome, added
+  `viewport-fit=cover` and `env(safe-area-inset-*)` padding so controls
+  clear the home indicator on iPhone X+, shrank the controls a touch on
+  portrait phones (100 px joystick / 78 px buttons) so they fit
+  comfortably without overlapping the canvas.
 
 ## [0.1.0] — 2026-04-30
 
