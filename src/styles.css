@@ -1,0 +1,86 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #d8d8d8;
+  font-family: 'Menlo', 'Consolas', monospace;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #000;
+}
+
+#game {
+  width: min(100vw, calc(100vh * 320 / 256));
+  height: min(100vh, calc(100vw * 256 / 320));
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+  cursor: crosshair;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.78);
+  text-align: center;
+  padding: 1.5rem;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.overlay.hidden { opacity: 0; pointer-events: none; }
+
+.overlay h1 {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: 0.4em;
+  margin: 0 0 0.5rem;
+  color: #f0f0f0;
+}
+
+.byline { color: #888; margin: 0 0 2rem; }
+.hint { color: #ffcc66; margin: 0.5rem 0 1.5rem; }
+
+.controls {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  line-height: 1.7;
+  color: #c8c8c8;
+}
+.controls b { color: #fff; }
+
+.goal {
+  max-width: 36rem;
+  color: #a0a0a0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #888;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  text-align: center;
+  pointer-events: none;
+  letter-spacing: 0.1em;
+}

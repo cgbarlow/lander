@@ -1,0 +1,19 @@
+{
+  "name": "lander",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Browser recreation of David Braben's Lander (Acorn Archimedes, 1987)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vite": "8.0.10",
+    "vitest": "4.1.5",
+    "jsdom": "29.1.0"
+  }
+}
